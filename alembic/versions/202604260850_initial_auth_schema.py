@@ -1,40 +1,13 @@
-"""${message}
-
-Revision ID: ${up_revision}
-Revises: ${down_revision | comma,n}
-Create Date: ${create_date}
-"""
-
-from collections.abc import Sequence
-
-from alembic import op
-import sqlalchemy as sa
-${imports if imports else ""}
-
-
-# revision identifiers, used by Alembic.
-revision: str = ${repr(up_revision)}
-down_revision: str | None = ${repr(down_revision)}
-branch_labels: str | Sequence[str] | None = ${repr(branch_labels)}
-depends_on: str | Sequence[str] | None = ${repr(depends_on)}
-
-
-def upgrade() -> None:
-    ${upgrades if upgrades else "pass"}
-
-
-def downgrade() -> None:
-    ${downgrades if downgrades else "pass"}
-*** Add File: /Users/vidwadeseram/Documents/GitHub/python-auth-template/alembic/versions/202604260850_initial_auth_schema.py
 """initial auth schema
 
 Revision ID: 202604260850
-Revises: 
+Revises:
 Create Date: 2026-04-26 08:50:00.000000
 """
 
 import uuid
 from collections.abc import Sequence
+from datetime import datetime
 
 from alembic import op
 import sqlalchemy as sa
@@ -99,19 +72,19 @@ def upgrade() -> None:
                 "id": uuid.UUID("11111111-1111-1111-1111-111111111111"),
                 "name": "super_admin",
                 "description": "Super administrator",
-                "created_at": sa.text("now()"),
+                "created_at": datetime.utcnow(),
             },
             {
                 "id": uuid.UUID("22222222-2222-2222-2222-222222222222"),
                 "name": "admin",
                 "description": "Administrator",
-                "created_at": sa.text("now()"),
+                "created_at": datetime.utcnow(),
             },
             {
                 "id": uuid.UUID("33333333-3333-3333-3333-333333333333"),
                 "name": "user",
                 "description": "Standard user",
-                "created_at": sa.text("now()"),
+                "created_at": datetime.utcnow(),
             },
         ],
     )
