@@ -12,8 +12,8 @@ from app.utils.errors import AppError
 
 class VerificationService:
     def __init__(self, session: AsyncSession):
-        self.session = session
-        self.token_service = TokenService()
+        self.session: AsyncSession = session
+        self.token_service: TokenService = TokenService()
 
     async def send_verification_email(self, user: User) -> None:
         verification_token, expires_at = self.token_service.create_verification_token(str(user.id), user.email)

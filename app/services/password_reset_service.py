@@ -13,8 +13,8 @@ from app.utils.security import hash_password
 
 class PasswordResetService:
     def __init__(self, session: AsyncSession):
-        self.session = session
-        self.token_service = TokenService()
+        self.session: AsyncSession = session
+        self.token_service: TokenService = TokenService()
 
     async def request_reset(self, email: str) -> None:
         user = await self.session.scalar(select(User).where(User.email == email.lower()))
