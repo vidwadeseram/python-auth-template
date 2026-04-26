@@ -9,7 +9,7 @@ from app.database import Base
 
 
 class EmailVerificationToken(Base):
-    __tablename__ = "email_verification_tokens"
+    __tablename__: str = "email_verification_tokens"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     user_id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)

@@ -6,16 +6,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
 from app.schemas.auth import LoginRequest, RegisterRequest, TokenData
+from app.services.password_reset_service import PasswordResetService
 from app.services.token_service import TokenService
-from app.utils.email import send_email
+from app.services.verification_service import VerificationService
 from app.utils.errors import AppError
 from app.utils.security import hash_password, verify_password
 
 
 class AuthService:
     def __init__(self, session: AsyncSession):
-        self.session = session
-        self.token_service = TokenService()
+        self.session: AsyncSession = session
+        self.token_service: TokenService = TokenService()
 
     async def register(self, payload: RegisterRequest) -> User:
         existing = await self.session.scalar(select(User).where(User.email == payload.email.lower()))
@@ -32,12 +33,7 @@ class AuthService:
         await self.session.commit()
         await self.session.refresh(user)
 
-        verification_token = self.token_service.create_verification_token(str(user.id), user.email)
-        await send_email(
-            recipient=user.email,
-            subject="Verify your account",
-            body=f"Welcome {user.first_name}, your verification token is: {verification_token}",
-        )
+        await VerificationService(self.session).send_verification_email(user)
         return user
 
     async def login(self, payload: LoginRequest) -> TokenData:
@@ -87,30 +83,10 @@ class AuthService:
         return tokens
 
     async def verify_email(self, token: str) -> None:
-        payload = self.token_service.decode_token(token, expected_type="verify")
-        user = await self.session.scalar(select(User).where(User.id == payload.subject))
-        if user is None:
-            raise AppError(404, "USER_NOT_FOUND", "User not found.")
-        if user.is_verified:
-            raise AppError(400, "ALREADY_VERIFIED", "Email is already verified.")
-        user.is_verified = True
-        await self.session.commit()
+        await VerificationService(self.session).verify_email(token)
 
     async def forgot_password(self, email: str) -> None:
-        user = await self.session.scalar(select(User).where(User.email == email.lower()))
-        if user is None:
-            return
-        reset_token = self.token_service.create_verification_token(str(user.id), user.email)
-        await send_email(
-            recipient=user.email,
-            subject="Password Reset",
-            body=f"Your password reset token is: {reset_token}",
-        )
+        await PasswordResetService(self.session).request_reset(email)
 
     async def reset_password(self, token: str, new_password: str) -> None:
-        payload = self.token_service.decode_token(token, expected_type="verify")
-        user = await self.session.scalar(select(User).where(User.id == payload.subject))
-        if user is None:
-            raise AppError(404, "USER_NOT_FOUND", "User not found.")
-        user.password_hash = hash_password(new_password)
-        await self.session.commit()
+        await PasswordResetService(self.session).reset_password(token, new_password)

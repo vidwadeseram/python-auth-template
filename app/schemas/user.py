@@ -1,12 +1,11 @@
 from datetime import datetime
-from typing import ClassVar
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class UserRead(BaseModel):
-    model_config: ClassVar[ConfigDict] = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
     id: UUID
     email: EmailStr
@@ -20,7 +19,3 @@ class UserRead(BaseModel):
 
 class UserResponse(BaseModel):
     data: UserRead
-
-
-class UserDetailResponse(UserResponse):
-    pass
