@@ -1,0 +1,3 @@
+- Extended auth + RBAC work required restarting the compose stack with `docker-compose down -v` whenever Alembic revisions changed so seeded tables and permissions were recreated from scratch.
+- MailHog messages can be fetched reliably from inside the app container via `http://mailhog:8025/api/v2/messages` to extract verification and reset tokens for curl-based endpoint tests.
+- Role-permission CRUD was more stable when handled through explicit association-table SQL operations instead of mutating unloaded SQLAlchemy many-to-many collections in async contexts.

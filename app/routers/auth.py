@@ -8,8 +8,9 @@ from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.schemas.auth import AuthUserResponse, LoginRequest, LogoutRequest, MessageResponse, RefreshTokenRequest, RegisterRequest, TokenResponse
 from app.schemas.extended_auth import ForgotPasswordRequest, ResetPasswordRequest, VerifyEmailRequest
-from app.schemas.user import UserResponse
+from app.schemas.user import UserDetailResponse
 from app.services.auth_service import AuthService
+from app.services.user_service import UserService
 
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
@@ -39,9 +40,9 @@ async def refresh(payload: RefreshTokenRequest, session: Annotated[AsyncSession,
     return {"data": tokens.model_dump()}
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=UserDetailResponse)
 async def me(current_user: Annotated[User, Depends(get_current_user)]):
-    return {"data": current_user}
+    return {"data": UserService.serialize_user(current_user)}
 
 
 @router.post("/verify-email", response_model=MessageResponse)
