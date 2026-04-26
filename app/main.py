@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 import structlog
 from fastapi import FastAPI
 
+from app.middleware.ratelimit import RateLimitMiddleware
 from app.routers.admin import router as admin_router
 from app.routers.auth import router as auth_router
 from app.routers.health import router as health_router
@@ -26,6 +27,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Python Auth Template", version="0.1.0", lifespan=lifespan)
+app.add_middleware(RateLimitMiddleware, rate=1 / 60, burst=5, prefix="/api/v1/auth")
 register_exception_handlers(app)
 app.include_router(health_router)
 app.include_router(auth_router)
